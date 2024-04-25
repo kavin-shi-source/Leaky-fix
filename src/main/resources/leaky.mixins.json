@@ -5,7 +5,8 @@
   "refmap": "leaky.refmap.json",
   "mixins": [
     "ItemEntityMixin",
-    "EntitySectionMixin"
+    "EntitySectionMixin",
+    "ItemUpdateMixin"
   ],
   "client": [
   ],

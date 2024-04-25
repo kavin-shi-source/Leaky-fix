@@ -43,8 +43,27 @@ public class Leaky
         LOGGER.info(MODID + " mod initialized");
     }
 
-    public static void detectedItemLeak(final ItemEntity entity, final List<ItemEntity> items)
+    public static void detectedItemLeak(final ItemEntity entity, final List<ItemEntity> items, final int range)
     {
+        int size = items.size();
+        for (final ItemEntity item : items)
+        {
+            if (item instanceof INearbyItemAwareEntity nearbyItemAware)
+            {
+                nearbyItemAware.setNearbyItems(size);
+            }
+        }
+
+        if (range > 2)
+        {
+            size /= 2;
+        }
+
+        if (size < Leaky.config.getCommonConfig().reportThreshold)
+        {
+            return;
+        }
+
         for (final Map.Entry<BlockPos, Long> entry : reportedLocations.entrySet())
         {
             if (entry.getKey().distSqr(entity.blockPosition()) < 10 * 10 && (entity.level().getGameTime() - entry.getValue()) < config.getCommonConfig().reportInterval * 20)
@@ -55,7 +74,7 @@ public class Leaky
 
         reportedLocations.put(entity.blockPosition(), entity.level().getGameTime());
 
-        MutableComponent component = Component.literal("Detected farm leak: " + items.size() + " stacked items at:")
+        MutableComponent component = Component.literal("Detected: " + items.size() + " stacked items at:")
           .append(Component.literal("[" + entity.blockPosition().toShortString() + "]")
             .withStyle(ChatFormatting.YELLOW).withStyle(style ->
             {
@@ -64,9 +83,9 @@ public class Leaky
             }))
           .append(Component.literal(" in " + entity.level().dimension().location().toString()));
 
-        if (items.size() > config.getCommonConfig().autoremovethreshold)
+        if (size > config.getCommonConfig().autoremovethreshold && items.get(0).getAge() > 20 * 30)
         {
-            component.append(Component.literal(". Removed leaking items automatically"));
+            component.append(Component.literal(". Cleaned items automatically to prevent lag"));
             items.forEach(Entity::discard);
         }
 
