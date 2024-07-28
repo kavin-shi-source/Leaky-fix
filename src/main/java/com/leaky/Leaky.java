@@ -10,9 +10,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,9 +33,9 @@ public class Leaky
 
     private static Map<BlockPos, Long> reportedLocations = new HashMap<>();
 
-    public Leaky()
+    public Leaky(IEventBus modEventBus, ModContainer modContainer)
     {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        modEventBus.addListener(this::setup);
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -75,13 +76,13 @@ public class Leaky
         reportedLocations.put(entity.blockPosition(), entity.level().getGameTime());
 
         MutableComponent component = Component.literal("Detected: " + items.size() + " stacked items at:")
-          .append(Component.literal("[" + entity.blockPosition().toShortString() + "]")
-            .withStyle(ChatFormatting.YELLOW).withStyle(style ->
-            {
-                return style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                  "/tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ()));
-            }))
-          .append(Component.literal(" in " + entity.level().dimension().location().toString()));
+                                       .append(Component.literal("[" + entity.blockPosition().toShortString() + "]")
+                                                 .withStyle(ChatFormatting.YELLOW).withStyle(style ->
+                                         {
+                                             return style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                               "/tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ()));
+                                         }))
+                                       .append(Component.literal(" in " + entity.level().dimension().location().toString()));
 
         if (size > config.getCommonConfig().autoremovethreshold && items.get(0).getAge() > 20 * 30)
         {
