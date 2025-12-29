@@ -91,7 +91,7 @@ public class Leaky
 
         reportedLocations.put(entity.blockPosition(), entity.level().getGameTime());
 
-        MutableComponent component = Component.translatable("leaky.detect", items.size(), entity.level().dimension().location())
+        MutableComponent component = Component.translatable("leaky.detect", items.size(), Component.translatable(entity.level().dimension().location().toLanguageKey()))
             .append(Component.literal("[" + entity.blockPosition().toShortString() + "]")
                 .withStyle(ChatFormatting.YELLOW).withStyle(style ->
                 {
