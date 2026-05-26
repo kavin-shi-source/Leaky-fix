@@ -8,6 +8,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -36,7 +37,8 @@ public class Leaky
 
     public Leaky()
     {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener(this::setup);
     }
 
     private void setup(final FMLCommonSetupEvent event)
@@ -58,7 +60,7 @@ public class Leaky
         }
 
         int effectiveSize = size;
-        if (range > 2 && size < cfg.autoremovethreshold * 3)
+        if (range > 2 && size < cfg.autoRemoveThreshold * 3)
         {
             effectiveSize /= 2;
         }
@@ -131,7 +133,7 @@ public class Leaky
 
         String nearestPlayerName = nearestPlayer != null ? nearestPlayer.getName().getString() : "无";
 
-        boolean removedItems = size > cfg.autoremovethreshold && (contained || size >= cfg.autoremovethreshold * 3);
+        boolean removedItems = size > cfg.autoRemoveThreshold && (contained || size >= cfg.autoRemoveThreshold * 3);
 
         String tpCommand = "/execute in " + entity.level().dimension().location() + " run tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ();
         MutableComponent component = LeakMessageFormatter.buildComponent(
@@ -149,14 +151,14 @@ public class Leaky
             items.forEach(Entity::discard);
         }
 
-        if (cfg.chatnotification.equalsIgnoreCase("PLAYER"))
+        if (cfg.chatNotification.equalsIgnoreCase("PLAYER"))
         {
             if (nearestPlayer != null)
             {
                 nearestPlayer.sendSystemMessage(component);
             }
         }
-        else if (cfg.chatnotification.equalsIgnoreCase("EVERYONE"))
+        else if (cfg.chatNotification.equalsIgnoreCase("EVERYONE"))
         {
             if (entity.level().getServer() != null)
             {
@@ -166,7 +168,7 @@ public class Leaky
                 }
             }
         }
-        else if (cfg.chatnotification.equalsIgnoreCase("OP"))
+        else if (cfg.chatNotification.equalsIgnoreCase("OP"))
         {
             if (entity.level().getServer() != null)
             {

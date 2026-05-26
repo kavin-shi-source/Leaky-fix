@@ -38,7 +38,7 @@ public abstract class ItemEntityMixin extends Entity
     @Inject(method = "tick", at = @At(value = "TAIL"))
     private void checkSize(CallbackInfo ci)
     {
-        if (reported || age < 20 * 60 || tickCount % 400 != 0)
+        if (age < 20 * 60 || tickCount % 400 != 0)
         {
             return;
         }
@@ -47,9 +47,7 @@ public abstract class ItemEntityMixin extends Entity
 
         if (items.size() > Leaky.config.getCommonConfig().reportThreshold)
         {
-            reported = true;
-
-            if (level().isClientSide && Leaky.config.getCommonConfig().highlightitems)
+            if (level().isClientSide && Leaky.config.getCommonConfig().highlightItems)
             {
                 for (final ItemEntity item : items)
                 {
@@ -60,16 +58,27 @@ public abstract class ItemEntityMixin extends Entity
                 }
             }
 
-            if (!level().isClientSide)
+            if (!level().isClientSide && !reported)
             {
+                reported = true;
                 Leaky.detectedItemLeak(self, items, 2);
             }
         }
         else
         {
+            if (level().isClientSide && reported)
+            {
+                for (final ItemEntity item : items)
+                {
+                    if (item.isCurrentlyGlowing())
+                    {
+                        item.setSharedFlag(6, false);
+                    }
+                }
+            }
             reported = false;
             final int size = items.size();
-            for(final ItemEntity item: items)
+            for (final ItemEntity item : items)
             {
                 if (item instanceof INearbyItemAwareEntity nearbyItemAware)
                 {

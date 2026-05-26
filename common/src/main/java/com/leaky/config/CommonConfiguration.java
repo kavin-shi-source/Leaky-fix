@@ -1,15 +1,18 @@
 package com.leaky.config;
 
 import com.cupboard.config.ICommonConfig;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import java.util.function.Function;
 
 public class CommonConfiguration implements ICommonConfig
 {
-    public int     reportInterval      = 60 * 3;
-    public String  chatnotification    = "PLAYER";
-    public boolean highlightitems      = true;
-    public int     reportThreshold     = 200;
-    public int     autoremovethreshold = 400;
+    public int     reportInterval       = 60 * 3;
+    public String  chatNotification     = "PLAYER";
+    public boolean highlightItems       = true;
+    public int     reportThreshold      = 200;
+    public int     autoRemoveThreshold  = 400;
     public boolean improveItemPerformance = true;
 
     public CommonConfiguration()
@@ -27,8 +30,8 @@ public class CommonConfiguration implements ICommonConfig
 
         final JsonObject entry5 = new JsonObject();
         entry5.addProperty("desc:", "是否高亮显示附近堆叠的物品实体。默认值: true");
-        entry5.addProperty("highlightitems", highlightitems);
-        root.add("highlightitems", entry5);
+        entry5.addProperty("highlightItems", highlightItems);
+        root.add("highlightItems", entry5);
 
         final JsonObject entry6 = new JsonObject();
         entry6.addProperty("desc:", "触发报告的最小物品堆叠数量。默认值: 200");
@@ -37,8 +40,8 @@ public class CommonConfiguration implements ICommonConfig
 
         final JsonObject entry7 = new JsonObject();
         entry7.addProperty("desc:", "自动清理的物品堆叠数量阈值，首次检测后等待报告间隔时间才会清理。如果堆叠数量超过阈值的3倍则立即清理。默认值: 400");
-        entry7.addProperty("autoremovethreshold", autoremovethreshold);
-        root.add("autoremovethreshold", entry7);
+        entry7.addProperty("autoRemoveThreshold", autoRemoveThreshold);
+        root.add("autoRemoveThreshold", entry7);
 
         final JsonObject entry3 = new JsonObject();
         entry3.addProperty("desc:", "重复通知的间隔时间（秒）。默认值: 180");
@@ -47,20 +50,20 @@ public class CommonConfiguration implements ICommonConfig
 
         final JsonObject entry4 = new JsonObject();
         entry4.addProperty("desc:", "聊天通知类型: PLAYER(最近的玩家), EVERYONE(所有玩家), NONE(无), OP(管理员)。默认值: PLAYER");
-        entry4.addProperty("chatnotification", chatnotification);
-        root.add("chatnotification", entry4);
+        entry4.addProperty("chatNotification", chatNotification);
+        root.add("chatNotification", entry4);
 
         return root;
     }
 
     public void deserialize(JsonObject data)
     {
-        reportInterval = getSafeInt(data, "reportInterval", reportInterval);
-        chatnotification = getSafeString(data, "chatnotification", chatnotification);
-        highlightitems = getSafeBoolean(data, "highlightitems", highlightitems);
-        improveItemPerformance = getSafeBoolean(data, "improveItemPerformance", improveItemPerformance);
-        reportThreshold = getSafeInt(data, "reportThreshold", reportThreshold);
-        autoremovethreshold = getSafeInt(data, "autoremovethreshold", autoremovethreshold);
+        reportInterval = getSafeValue(data, "reportInterval", reportInterval, JsonElement::getAsInt);
+        chatNotification = getSafeValue(data, "chatNotification", chatNotification, JsonElement::getAsString);
+        highlightItems = getSafeValue(data, "highlightItems", highlightItems, JsonElement::getAsBoolean);
+        improveItemPerformance = getSafeValue(data, "improveItemPerformance", improveItemPerformance, JsonElement::getAsBoolean);
+        reportThreshold = getSafeValue(data, "reportThreshold", reportThreshold, JsonElement::getAsInt);
+        autoRemoveThreshold = getSafeValue(data, "autoRemoveThreshold", autoRemoveThreshold, JsonElement::getAsInt);
 
         validate();
     }
@@ -75,18 +78,18 @@ public class CommonConfiguration implements ICommonConfig
         {
             reportThreshold = 200;
         }
-        if (autoremovethreshold < reportThreshold)
+        if (autoRemoveThreshold < reportThreshold)
         {
-            autoremovethreshold = 400;
+            autoRemoveThreshold = 400;
         }
-        if (!chatnotification.equalsIgnoreCase("PLAYER") && !chatnotification.equalsIgnoreCase("EVERYONE")
-            && !chatnotification.equalsIgnoreCase("OP") && !chatnotification.equalsIgnoreCase("NONE"))
+        if (!chatNotification.equalsIgnoreCase("PLAYER") && !chatNotification.equalsIgnoreCase("EVERYONE")
+            && !chatNotification.equalsIgnoreCase("OP") && !chatNotification.equalsIgnoreCase("NONE"))
         {
-            chatnotification = "PLAYER";
+            chatNotification = "PLAYER";
         }
     }
 
-    private int getSafeInt(JsonObject data, String key, int defaultValue)
+    private <T> T getSafeValue(JsonObject data, String key, T defaultValue, Function<JsonElement, T> parser)
     {
         try
         {
@@ -95,45 +98,7 @@ public class CommonConfiguration implements ICommonConfig
                 JsonObject obj = data.getAsJsonObject(key);
                 if (obj.has(key))
                 {
-                    return obj.get(key).getAsInt();
-                }
-            }
-        }
-        catch (Exception ignored)
-        {
-        }
-        return defaultValue;
-    }
-
-    private String getSafeString(JsonObject data, String key, String defaultValue)
-    {
-        try
-        {
-            if (data.has(key) && data.get(key).isJsonObject())
-            {
-                JsonObject obj = data.getAsJsonObject(key);
-                if (obj.has(key))
-                {
-                    return obj.get(key).getAsString();
-                }
-            }
-        }
-        catch (Exception ignored)
-        {
-        }
-        return defaultValue;
-    }
-
-    private boolean getSafeBoolean(JsonObject data, String key, boolean defaultValue)
-    {
-        try
-        {
-            if (data.has(key) && data.get(key).isJsonObject())
-            {
-                JsonObject obj = data.getAsJsonObject(key);
-                if (obj.has(key))
-                {
-                    return obj.get(key).getAsBoolean();
+                    return parser.apply(obj.get(key));
                 }
             }
         }

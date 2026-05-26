@@ -21,9 +21,9 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
     @Shadow
     private int age;
 
-    public ItemUpdateMixin(final EntityType<?> p_19870_, final Level p_19871_)
+    public ItemUpdateMixin(final EntityType<?> entityType, final Level level)
     {
-        super(p_19870_, p_19871_);
+        super(entityType, level);
     }
 
     @Unique
@@ -96,7 +96,7 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
     }
 
     @Inject(method = "playerTouch", at = @At("HEAD"))
-    private void onInteract(final Player p_32040_, final CallbackInfo ci)
+    private void onInteract(final Player player, final CallbackInfo ci)
     {
         updateRate = 1;
         delay = 300;

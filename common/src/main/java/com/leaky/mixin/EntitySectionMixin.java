@@ -29,18 +29,36 @@ public class EntitySectionMixin<T extends EntityAccess>
     @Inject(method = "add", at = @At("HEAD"))
     private void leaky$addEntity(final T entity, final CallbackInfo ci)
     {
-        if (entity instanceof ItemEntity itemEntity && storage.size() > Leaky.config.getCommonConfig().reportThreshold)
+        if (entity instanceof ItemEntity itemEntity)
         {
             if (itemEntity.level().isClientSide)
             {
                 Collection<ItemEntity> collection = this.storage.find(ItemEntity.class);
-                if (collection.size() > Leaky.config.getCommonConfig().reportThreshold * 2 && Leaky.config.getCommonConfig().highlightitems)
+                if (collection.size() > Leaky.config.getCommonConfig().reportThreshold * 2 && Leaky.config.getCommonConfig().highlightItems)
                 {
                     for (final ItemEntity item : collection)
                     {
-                        item.setSharedFlag(6, true);
+                        if (!item.isCurrentlyGlowing())
+                        {
+                            item.setSharedFlag(6, true);
+                        }
                     }
                 }
+                else if (collection.size() <= Leaky.config.getCommonConfig().reportThreshold && Leaky.config.getCommonConfig().highlightItems)
+                {
+                    for (final ItemEntity item : collection)
+                    {
+                        if (item.isCurrentlyGlowing())
+                        {
+                            item.setSharedFlag(6, false);
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (storage.size() <= Leaky.config.getCommonConfig().reportThreshold)
+            {
                 return;
             }
 

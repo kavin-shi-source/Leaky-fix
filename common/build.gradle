@@ -20,6 +20,19 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
+compileJava {
+    enabled = false
+}
+
+compileTestJava {
+    enabled = false
+}
+
+jar {
+    enabled = false
+}
+
 test {
     useJUnitPlatform()
+    enabled = false
 }

@@ -60,7 +60,7 @@ public class Leaky
         }
 
         int effectiveSize = size;
-        if (range > 2 && size < cfg.autoremovethreshold * 3)
+        if (range > 2 && size < cfg.autoRemoveThreshold * 3)
         {
             effectiveSize /= 2;
         }
@@ -134,6 +134,7 @@ public class Leaky
         String nearestPlayerName = nearestPlayer != null ? nearestPlayer.getName().getString() : "无";
 
         String tpCommand = "/execute in " + entity.level().dimension().location() + " run tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ();
+        boolean removedItems = size > cfg.autoRemoveThreshold && (contained || size >= cfg.autoRemoveThreshold * 3);
         MutableComponent component = LeakMessageFormatter.buildComponent(
             items.size(),
             entity.blockPosition().toShortString(),
@@ -141,22 +142,22 @@ public class Leaky
             entity.level().dimension().location().toLanguageKey(),
             nearestPlayerName,
             tpCommand,
-            size > cfg.autoremovethreshold && (contained || size >= cfg.autoremovethreshold * 3)
+            removedItems
         );
 
-        if (size > cfg.autoremovethreshold && (contained || size >= cfg.autoremovethreshold * 3))
+        if (removedItems)
         {
             items.forEach(Entity::discard);
         }
 
-        if (cfg.chatnotification.equalsIgnoreCase("PLAYER"))
+        if (cfg.chatNotification.equalsIgnoreCase("PLAYER"))
         {
             if (nearestPlayer != null)
             {
                 nearestPlayer.sendSystemMessage(component);
             }
         }
-        else if (cfg.chatnotification.equalsIgnoreCase("EVERYONE"))
+        else if (cfg.chatNotification.equalsIgnoreCase("EVERYONE"))
         {
             if (entity.level().getServer() != null)
             {
@@ -166,7 +167,7 @@ public class Leaky
                 }
             }
         }
-        else if (cfg.chatnotification.equalsIgnoreCase("OP"))
+        else if (cfg.chatNotification.equalsIgnoreCase("OP"))
         {
             if (entity.level().getServer() != null)
             {
@@ -189,7 +190,7 @@ public class Leaky
         }
         else
         {
-            component.append(Component.literal(" Chatnotification mode:NONE(" + cfg.chatnotification + ")"));
+            component.append(Component.literal(" Chatnotification mode:NONE(" + cfg.chatNotification + ")"));
         }
 
         Leaky.LOGGER.warn(component.getString());

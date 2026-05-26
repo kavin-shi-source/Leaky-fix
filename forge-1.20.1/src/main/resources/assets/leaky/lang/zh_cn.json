@@ -1,0 +1,6 @@
+{
+  "leaky.detect": "发现: %d的物品堆叠量 | 位于 ",
+  "leaky.dimension": " | 维度: %s",
+  "leaky.nearest_player": " | 最近的玩家ID为 %s",
+  "leaky.removedItems": ". 已自动清理物品以防止卡顿"
+}

@@ -1,18 +1,25 @@
 modLoader="javafml"
-loaderVersion="${loader_version_range}"
+loaderVersion="[4,)"
 license="ARR"
 [[mods]]
 modId="leaky"
-version="${mod_version}"
+version="2.4.1"
 displayName="leaky mod"
+logoFile="icon.png"
 authors="Someaddon"
 description='''
 Improve item performance and detects, reports and removes too many stacked items.
 '''
 [[dependencies.leaky]]
+    modId="neoforge"
+    mandatory=true
+    versionRange="[21.1,)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.leaky]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.21,1.30)"
+    versionRange="[1.21,1.22)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.leaky]]
