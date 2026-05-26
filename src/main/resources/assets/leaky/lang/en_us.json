@@ -1,4 +1,4 @@
 {
-  "leaky.removedItems": ". Cleaned items automatically to prevent lag",
-  "leaky.detect": "Detected: %d stacked items in %s at: "
+  "leaky.removedItems": ". 已自动清理物品以防止卡顿",
+  "leaky.detect": "发现: %d的物品堆叠量 | 位于 "
 }

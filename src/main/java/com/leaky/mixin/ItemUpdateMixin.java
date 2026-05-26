@@ -79,9 +79,14 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
     @Inject(method = "tick", at = @At("RETURN"))
     private void checkRate(final CallbackInfo ci)
     {
-        if (tickCount <= 1)
+        if (tickCount <= 1 || (tickCount + getId()) % 400 == 0)
         {
             closePlayer = level().getNearestPlayer(this, 32.0);
+        }
+
+        if (closePlayer != null && closePlayer.isRemoved())
+        {
+            closePlayer = null;
         }
 
         if ((tickCount + getId()) % 20 == 0)
@@ -118,7 +123,7 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
         }
 
         // Tick slower the longer it exists
-        updateRate += tickCount / 200.0;
+        updateRate += tickCount / 200;
 
         // If player is far away tick slower
         if (closePlayer != null && closePlayer.blockPosition().distSqr(blockPosition()) > 32 * 32)
@@ -135,7 +140,7 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
         }
 
         // On movement reset
-        if (previousPos != null && previousPos != blockPosition() && !previousPos.equals(blockPosition()))
+        if (previousPos != null && !previousPos.equals(blockPosition()))
         {
             updateRate = 1;
             delay = 300;
@@ -152,6 +157,6 @@ public abstract class ItemUpdateMixin extends Entity implements INearbyItemAware
     @Override
     public void setNearbyItems(final int items)
     {
-        nearbyItems = Math.max(nearbyItems, items);
+        nearbyItems = items;
     }
 }

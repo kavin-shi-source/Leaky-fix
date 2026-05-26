@@ -47,15 +47,18 @@ public abstract class ItemEntityMixin extends Entity
 
         if (items.size() > Leaky.config.getCommonConfig().reportThreshold)
         {
+            reported = true;
+
             if (level().isClientSide && Leaky.config.getCommonConfig().highlightitems)
             {
                 for (final ItemEntity item : items)
                 {
-                    item.setSharedFlag(6, true);
+                    if (!item.isCurrentlyGlowing())
+                    {
+                        item.setSharedFlag(6, true);
+                    }
                 }
             }
-
-            reported = true;
 
             if (!level().isClientSide)
             {
@@ -64,6 +67,7 @@ public abstract class ItemEntityMixin extends Entity
         }
         else
         {
+            reported = false;
             final int size = items.size();
             for(final ItemEntity item: items)
             {

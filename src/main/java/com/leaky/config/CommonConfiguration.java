@@ -2,6 +2,7 @@ package com.leaky.config;
 
 import com.cupboard.config.ICommonConfig;
 import com.google.gson.JsonObject;
+import com.leaky.Leaky;
 
 public class CommonConfiguration implements ICommonConfig
 {
@@ -22,7 +23,7 @@ public class CommonConfiguration implements ICommonConfig
         final JsonObject root = new JsonObject();
 
         final JsonObject entry8 = new JsonObject();
-        entry8.addProperty("desc:", "Improves item entiy performance, significantly reduing their overhead. default: true");
+        entry8.addProperty("desc:", "Improves item entity performance, significantly reducing their overhead. default: true");
         entry8.addProperty("improveItemPerformance", improveItemPerformance);
         root.add("improveItemPerformance", entry8);
 
@@ -42,7 +43,7 @@ public class CommonConfiguration implements ICommonConfig
         root.add("autoremovethreshold", entry7);
 
         final JsonObject entry3 = new JsonObject();
-        entry3.addProperty("desc:", "Set the amount of seconds between repeated notifications, : default: 180");
+        entry3.addProperty("desc:", "Set the amount of seconds between repeated notifications, default: 180");
         entry3.addProperty("reportInterval", reportInterval);
         root.add("reportInterval", entry3);
 
@@ -56,11 +57,58 @@ public class CommonConfiguration implements ICommonConfig
 
     public void deserialize(JsonObject data)
     {
-        reportInterval = data.get("reportInterval").getAsJsonObject().get("reportInterval").getAsInt();
-        chatnotification = data.get("chatnotification").getAsJsonObject().get("chatnotification").getAsString();
-        highlightitems = data.get("highlightitems").getAsJsonObject().get("highlightitems").getAsBoolean();
-        improveItemPerformance = data.get("improveItemPerformance").getAsJsonObject().get("improveItemPerformance").getAsBoolean();
-        reportThreshold = data.get("reportThreshold").getAsJsonObject().get("reportThreshold").getAsInt();
-        autoremovethreshold = data.get("autoremovethreshold").getAsJsonObject().get("autoremovethreshold").getAsInt();
+        try
+        {
+            if (data.has("reportInterval"))
+            {
+                reportInterval = data.get("reportInterval").getAsJsonObject().get("reportInterval").getAsInt();
+            }
+            if (data.has("chatnotification"))
+            {
+                chatnotification = data.get("chatnotification").getAsJsonObject().get("chatnotification").getAsString();
+            }
+            if (data.has("highlightitems"))
+            {
+                highlightitems = data.get("highlightitems").getAsJsonObject().get("highlightitems").getAsBoolean();
+            }
+            if (data.has("improveItemPerformance"))
+            {
+                improveItemPerformance = data.get("improveItemPerformance").getAsJsonObject().get("improveItemPerformance").getAsBoolean();
+            }
+            if (data.has("reportThreshold"))
+            {
+                reportThreshold = data.get("reportThreshold").getAsJsonObject().get("reportThreshold").getAsInt();
+            }
+            if (data.has("autoremovethreshold"))
+            {
+                autoremovethreshold = data.get("autoremovethreshold").getAsJsonObject().get("autoremovethreshold").getAsInt();
+            }
+        }
+        catch (Exception e)
+        {
+            Leaky.LOGGER.error("Failed to deserialize config, using defaults: {}", e.getMessage(), e);
+        }
+
+        if (reportInterval < 1)
+        {
+            Leaky.LOGGER.warn("reportInterval must be >= 1, got {}. Resetting to default 180", reportInterval);
+            reportInterval = 60 * 3;
+        }
+        if (reportThreshold < 1)
+        {
+            Leaky.LOGGER.warn("reportThreshold must be >= 1, got {}. Resetting to default 200", reportThreshold);
+            reportThreshold = 200;
+        }
+        if (autoremovethreshold < reportThreshold)
+        {
+            Leaky.LOGGER.warn("autoremovethreshold must be >= reportThreshold, got {}. Resetting to default 400", autoremovethreshold);
+            autoremovethreshold = 400;
+        }
+        if (!chatnotification.equalsIgnoreCase("PLAYER") && !chatnotification.equalsIgnoreCase("EVERYONE")
+            && !chatnotification.equalsIgnoreCase("OP") && !chatnotification.equalsIgnoreCase("NONE"))
+        {
+            Leaky.LOGGER.warn("Invalid chatnotification value: '{}'. Resetting to default PLAYER", chatnotification);
+            chatnotification = "PLAYER";
+        }
     }
 }
