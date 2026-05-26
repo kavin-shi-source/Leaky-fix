@@ -1,0 +1,25 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="ARR"
+[[mods]]
+modId="leaky"
+version="${mod_version}"
+displayName="leaky mod"
+authors="Someaddon"
+description='''
+Improve item performance and detects, reports and removes too many stacked items.
+'''
+[[dependencies.leaky]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.21,1.30)"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.leaky]]
+    modId="cupboard"
+    mandatory=true
+    versionRange="[1.21-1.4,)"
+    ordering="NONE"
+    side="BOTH"
+[[mixins]]
+    config="leaky.mixins.json"

@@ -1,0 +1,67 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.28-beta'
+}
+
+version = "${neoforge_mc_version}-${mod_version}"
+group = "com.${modid}"
+base.archivesName = "${modid}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets.main.java.srcDirs += '../common/src/main/java'
+
+neoForge {
+    version = project.neoforge_version
+    runs {
+        client {
+            systemProperty 'neoforge.enabledGameTest', 'true'
+        }
+        server {
+            systemProperty 'neoforge.enabledGameTest', 'true'
+            programArgument '--nogui'
+        }
+    }
+}
+
+repositories {
+    mavenLocal()
+    flatDir { dirs 'libs' }
+    mavenCentral()
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    implementation "curse.maven:cupboard-326652:5477519"
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "${modid}",
+            "Specification-Vendor": "${modid}",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor": "${modid}",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "${modid}.mixins.json"
+        ])
+    }
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifact jar
+        }
+    }
+}

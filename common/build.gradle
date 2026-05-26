@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+repositories {
+    mavenCentral()
+    maven { url = "https://www.cursemaven.com" }
+    maven { url = "https://maven.minecraftforge.net/" }
+    maven { url = "https://maven.neoforged.net/releases" }
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'it.unimi.dsi:fastutil:8.5.12'
+    implementation "curse.maven:cupboard-326652:4669193"
+    implementation 'org.spongepowered:mixin:0.8.5'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+test {
+    useJUnitPlatform()
+}
