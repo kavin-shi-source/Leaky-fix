@@ -41,21 +41,36 @@ public final class LeakMessageFormatter
         return formatBeforePosition(itemCount) + position + formatAfterPosition(dimensionName, playerName, removedItems);
     }
 
+    /**
+     * 构建纯文本日志消息，不依赖客户端语言文件
+     */
+    public static String buildLogString(final int itemCount, final String positionShort,
+        final String dimensionLocation, final String itemName, final String nearestPlayerName, final boolean removedItems)
+    {
+        return "Detected: " + itemCount + " " + itemName + " | at [" + positionShort
+            + "] | Dimension: " + dimensionLocation
+            + " | Nearest player: " + nearestPlayerName
+            + (removedItems ? ". Items auto-removed to prevent lag" : "");
+    }
+
     public static MutableComponent buildComponent(final int itemCount, final String positionShort,
-        final String dimensionLocation, final String dimensionTranslationKey,
+        final String dimensionLocation,
+        final Component itemName,
         final String playerName, final String tpCommand, final boolean removedItems)
     {
-        MutableComponent component = Component.translatable("leaky.detect", itemCount)
+        MutableComponent component = Component.literal("发现: " + itemCount + "的")
             .withStyle(ChatFormatting.RED)
+            .append(itemName)
+            .append(Component.literal("物品堆叠量 | 位于 "))
             .append(Component.literal("[" + positionShort + "]")
                 .withStyle(ChatFormatting.YELLOW)
                 .withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand))))
-            .append(Component.translatable("leaky.dimension", Component.translatable(dimensionTranslationKey)))
-            .append(Component.translatable("leaky.nearest_player", playerName));
+            .append(Component.literal(" | 维度: " + dimensionLocation))
+            .append(Component.literal(" | 最近的玩家ID为 " + playerName));
 
         if (removedItems)
         {
-            component.append(Component.translatable("leaky.removedItems"));
+            component.append(Component.literal(". 已自动清理物品以防止卡顿"));
         }
 
         return component;

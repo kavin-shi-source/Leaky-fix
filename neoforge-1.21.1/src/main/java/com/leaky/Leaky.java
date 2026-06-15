@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,13 +60,7 @@ public class Leaky
             }
         }
 
-        int effectiveSize = size;
-        if (range > 2 && size < cfg.autoRemoveThreshold * 3)
-        {
-            effectiveSize /= 2;
-        }
-
-        if (effectiveSize < cfg.reportThreshold)
+        if (size < cfg.reportThreshold)
         {
             return;
         }
@@ -133,13 +128,30 @@ public class Leaky
 
         String nearestPlayerName = nearestPlayer != null ? nearestPlayer.getName().getString() : "无";
 
-        String tpCommand = "/execute in " + entity.level().dimension().location() + " run tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ();
         boolean removedItems = size > cfg.autoRemoveThreshold && (contained || size >= cfg.autoRemoveThreshold * 3);
+
+        // 统计堆叠中数量最多的物品类型
+        Map<String, Integer> itemCounts = new HashMap<>();
+        ItemEntity sampleItem = entity;
+        int maxCount = 0;
+        for (final ItemEntity item : items)
+        {
+            String id = item.getItem().getDescriptionId();
+            int count = itemCounts.getOrDefault(id, 0) + 1;
+            itemCounts.put(id, count);
+            if (count > maxCount)
+            {
+                maxCount = count;
+                sampleItem = item;
+            }
+        }
+
+        String tpCommand = "/execute in " + entity.level().dimension().location() + " run tp " + entity.getBlockX() + " " + entity.getBlockY() + " " + entity.getBlockZ();
         MutableComponent component = LeakMessageFormatter.buildComponent(
             items.size(),
             entity.blockPosition().toShortString(),
             entity.level().dimension().location().toString(),
-            entity.level().dimension().location().toLanguageKey(),
+            sampleItem.getItem().getDisplayName(),
             nearestPlayerName,
             tpCommand,
             removedItems
@@ -193,6 +205,10 @@ public class Leaky
             component.append(Component.literal(" Chatnotification mode:NONE(" + cfg.chatNotification + ")"));
         }
 
-        Leaky.LOGGER.warn(component.getString());
+        Leaky.LOGGER.warn(LeakMessageFormatter.buildLogString(
+            items.size(), entity.blockPosition().toShortString(),
+            entity.level().dimension().location().toString(),
+            sampleItem.getItem().getDescriptionId(),
+            nearestPlayerName, removedItems));
     }
 }
